@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus
 
 data class PathConfig(
     val message: String,
-    val httpStatus: HttpStatus,          // Spring автоматически преобразует строку из YAML в enum
-    val allowedMethods: List<String>,    // список разрешённых HTTP-методов
-    val targetUrl: String? = null        // опциональное поле, может отсутствовать
+    val httpStatus: HttpStatus,
+    val allowedMethods: List<String>,
+    val targetUrl: String? = null      
 )

@@ -27,3 +27,9 @@ kotlin {
         freeCompilerArgs.add("-Xjsr305=strict")
     }
 }
+tasks.test {
+    useJUnitPlatform()
+    // Temporarily disable the strict check (you can remove this later when you add real tests)
+    failOnNoDiscoveredTests = false
+}
+
