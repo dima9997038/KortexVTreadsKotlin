@@ -1,6 +1,5 @@
 package binary.kortexvtreadskotlin.interceptor
 
-
 import binary.kortexvtreadskotlin.config.AllowedPathsProperties
 import binary.kortexvtreadskotlin.config.PathConfig
 import jakarta.servlet.http.HttpServletRequest
@@ -15,14 +14,22 @@ class PathValidationInterceptor(
 ) : HandlerInterceptor {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        val path = request.requestURI.removePrefix("/api/") // получаем часть после /api/
-        val pathConfig = allowedPathsProperties.paths[path]
+        val uri = request.requestURI
+
+        if (!uri.startsWith("/api/path/")) {
+            handleNotFound(request, response)
+            return false
+        }
+
+        val key = uri.removePrefix("/api/path/").trim('/')
+        val pathConfig = allowedPathsProperties.paths[key]
 
         return if (pathConfig != null) {
             handleConfiguredPath(request, response, pathConfig)
             false
         } else {
-            true
+            handleNotFound(request, response)
+            false
         }
     }
 
@@ -31,6 +38,8 @@ class PathValidationInterceptor(
         response: HttpServletResponse,
         config: PathConfig
     ) {
+        response.characterEncoding = "UTF-8"
+
         val method = request.method
         if (config.allowedMethods.isNotEmpty() && !config.allowedMethods.contains(method)) {
             response.status = HttpStatus.METHOD_NOT_ALLOWED.value()
@@ -49,6 +58,21 @@ class PathValidationInterceptor(
         config.targetUrl?.let {
             responseBody["targetUrl"] = it
         }
+        response.contentType = "application/json"
+        response.writer.write(convertToJson(responseBody))
+    }
+
+    private fun handleNotFound(
+        request: HttpServletRequest,
+        response: HttpServletResponse
+    ) {
+        response.characterEncoding = "UTF-8"
+        response.status = HttpStatus.NOT_FOUND.value()
+        val responseBody = mapOf(
+            "message" to "Путь не найден",
+            "path" to request.requestURI,
+            "timestamp" to System.currentTimeMillis()
+        )
         response.contentType = "application/json"
         response.writer.write(convertToJson(responseBody))
     }
