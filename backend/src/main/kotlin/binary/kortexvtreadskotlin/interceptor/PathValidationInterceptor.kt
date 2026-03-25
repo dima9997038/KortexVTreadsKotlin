@@ -2,6 +2,7 @@ package binary.kortexvtreadskotlin.interceptor
 
 import binary.kortexvtreadskotlin.config.AllowedPathsProperties
 import binary.kortexvtreadskotlin.config.PathConfig
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus
@@ -10,27 +11,24 @@ import org.springframework.web.servlet.HandlerInterceptor
 
 @Component
 class PathValidationInterceptor(
-    private val allowedPathsProperties: AllowedPathsProperties
+    private val allowedPathsProperties: AllowedPathsProperties,
+    private val objectMapper: ObjectMapper
 ) : HandlerInterceptor {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         val uri = request.requestURI
 
-        if (!uri.startsWith("/api/path/")) {
+        val matchedKey = allowedPathsProperties.paths.keys
+            .firstOrNull { key -> uri.contains("/$key") }
+
+        if (matchedKey == null) {
             handleNotFound(request, response)
             return false
         }
 
-        val key = uri.removePrefix("/api/path/").trim('/')
-        val pathConfig = allowedPathsProperties.paths[key]
-
-        return if (pathConfig != null) {
-            handleConfiguredPath(request, response, pathConfig)
-            false
-        } else {
-            handleNotFound(request, response)
-            false
-        }
+        val pathConfig = allowedPathsProperties.paths[matchedKey]!!
+        handleConfiguredPath(request, response, pathConfig)
+        return false
     }
 
     private fun handleConfiguredPath(
@@ -38,48 +36,38 @@ class PathValidationInterceptor(
         response: HttpServletResponse,
         config: PathConfig
     ) {
-        response.characterEncoding = "UTF-8"
-
         val method = request.method
         if (config.allowedMethods.isNotEmpty() && !config.allowedMethods.contains(method)) {
-            response.status = HttpStatus.METHOD_NOT_ALLOWED.value()
-            response.writer.write("{\"error\":\"Method $method not allowed for this path\"}")
+            writeJson(response, HttpStatus.METHOD_NOT_ALLOWED, mapOf(
+                "error" to "Method $method not allowed for this path",
+                "path" to request.requestURI,
+                "timestamp" to System.currentTimeMillis()
+            ))
             return
         }
-
-        response.status = config.httpStatus.value()
 
         val responseBody = mutableMapOf<String, Any>(
             "message" to config.message,
             "path" to request.requestURI,
             "timestamp" to System.currentTimeMillis()
         )
+        config.targetUrl?.let { responseBody["targetUrl"] = it }
 
-        config.targetUrl?.let {
-            responseBody["targetUrl"] = it
-        }
-        response.contentType = "application/json"
-        response.writer.write(convertToJson(responseBody))
+        writeJson(response, config.httpStatus, responseBody)
     }
 
-    private fun handleNotFound(
-        request: HttpServletRequest,
-        response: HttpServletResponse
-    ) {
-        response.characterEncoding = "UTF-8"
-        response.status = HttpStatus.NOT_FOUND.value()
-        val responseBody = mapOf(
+    private fun handleNotFound(request: HttpServletRequest, response: HttpServletResponse) {
+        writeJson(response, HttpStatus.NOT_FOUND, mapOf(
             "message" to "Путь не найден",
             "path" to request.requestURI,
             "timestamp" to System.currentTimeMillis()
-        )
-        response.contentType = "application/json"
-        response.writer.write(convertToJson(responseBody))
+        ))
     }
 
-    private fun convertToJson(map: Map<String, Any>): String {
-        return map.entries.joinToString(separator = ",", prefix = "{", postfix = "}") { (key, value) ->
-            "\"$key\":${if (value is String) "\"$value\"" else value}"
-        }
+    private fun writeJson(response: HttpServletResponse, status: HttpStatus, body: Map<String, Any>) {
+        response.characterEncoding = "UTF-8"
+        response.contentType = "application/json;charset=UTF-8"
+        response.status = status.value()
+        response.writer.write(objectMapper.writeValueAsString(body))
     }
 }

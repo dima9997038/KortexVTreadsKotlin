@@ -8,5 +8,6 @@ import org.springframework.stereotype.Component
 @ConfigurationProperties(prefix = "allowed")
 @PropertySource(value = ["classpath:allowed-paths.yaml"], factory = YamlPropertySourceFactory::class)
 class AllowedPathsProperties {
+    var prefix: String = "/api/"
     lateinit var paths: Map<String, PathConfig>
 }
