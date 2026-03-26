@@ -1,26 +1,26 @@
 allowed:
-  prefix: "/api/path/"
-  paths:
-    users:
-      message: "Перенаправление на сервис пользователей"
-      httpStatus: FORBIDDEN
-      allowedMethods: [ GET, POST ]
-      targetUrl: "http://localhost:8081/test"
-    products:
-      message: "Перенаправление на сервис товаров"
-      httpStatus: SERVICE_UNAVAILABLE
-      allowedMethods: [ GET ]
-      targetUrl: "http://product-service:8080/api/products"
-    orders:
-      message: "Заказы доступны только для чтения"
-      httpStatus: FORBIDDEN
-      allowedMethods: [ GET ]
-    documents:
-      message: "Документы не найдены"
-      httpStatus: NOT_FOUND
-      allowedMethods: []
-    reports:
-      message: "Отчёты в разработке"
-      httpStatus: NOT_IMPLEMENTED
-      allowedMethods: [ POST ]
-      targetUrl: "http://report-service:8080/api/reports"
+  api:
+    path:
+      users:
+        message: "Перенаправление на сервис пользователей"
+        httpStatus: FORBIDDEN
+        allowedMethods: [ GET, POST ]
+        targetUrl: "http://localhost:8081/test"
+      products:
+        message: "Перенаправление на сервис товаров"
+        httpStatus: SERVICE_UNAVAILABLE
+        allowedMethods: [ GET ]
+        targetUrl: "http://product-service:8080/api/products"
+      orders:
+        message: "Заказы доступны только для чтения"
+        httpStatus: FORBIDDEN
+        allowedMethods: [ GET ]
+      documents:
+        message: "Документы не найдены"
+        httpStatus: NOT_FOUND
+        allowedMethods: []
+      reports:
+        message: "Отчёты в разработке"
+        httpStatus: NOT_IMPLEMENTED
+        allowedMethods: [ POST ]
+        targetUrl: "http://report-service:8080/api/reports"

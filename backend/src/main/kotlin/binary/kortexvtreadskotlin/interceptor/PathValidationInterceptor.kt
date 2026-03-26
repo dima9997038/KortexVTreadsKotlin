@@ -18,15 +18,13 @@ class PathValidationInterceptor(
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         val uri = request.requestURI
 
-        val matchedKey = allowedPathsProperties.paths.keys
-            .firstOrNull { key -> uri.contains("/$key") }
+        val segment = uri.removePrefix("/api/path/").trim('/')
+        val pathConfig = allowedPathsProperties.path[segment]
 
-        if (matchedKey == null) {
+        if (pathConfig == null) {
             handleNotFound(request, response)
             return false
         }
-
-        val pathConfig = allowedPathsProperties.paths[matchedKey]!!
         handleConfiguredPath(request, response, pathConfig)
         return false
     }

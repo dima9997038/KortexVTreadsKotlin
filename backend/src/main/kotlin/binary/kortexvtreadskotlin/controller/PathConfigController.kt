@@ -15,5 +15,5 @@ class PathConfigController(
 ) {
 
     @GetMapping("/paths")
-    fun getAllPaths() = allowedPathsProperties.paths
+    fun getAllPaths() = allowedPathsProperties.path
 }
