@@ -1,6 +1,5 @@
 package binary.kortexvtreadskotlin.controller
 
-
 import binary.kortexvtreadskotlin.config.AllowedPathsProperties
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,5 +14,5 @@ class PathConfigController(
 ) {
 
     @GetMapping("/paths")
-    fun getAllPaths() = allowedPathsProperties.path
+    fun getAllPaths() = allowedPathsProperties.routes
 }

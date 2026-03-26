@@ -18,13 +18,25 @@ class PathValidationInterceptor(
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         val uri = request.requestURI
 
-        val segment = uri.removePrefix("/api/path/").trim('/')
-        val pathConfig = allowedPathsProperties.path[segment]
+        // "/api/product/step" → ["api", "product", "step"]
+        val parts = uri.trim('/').split("/")
+
+        // must be exactly /api/{category}/{segment}
+        if (parts.size < 3 || parts[0] != "api") {
+            handleNotFound(request, response)
+            return false
+        }
+
+        val category = parts[1]  // e.g. "product", "path"
+        val segment  = parts[2]  // e.g. "step", "users"
+
+        val pathConfig = allowedPathsProperties.routes[category]?.get(segment)
 
         if (pathConfig == null) {
             handleNotFound(request, response)
             return false
         }
+
         handleConfiguredPath(request, response, pathConfig)
         return false
     }
