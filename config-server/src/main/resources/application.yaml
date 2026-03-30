@@ -1,0 +1,38 @@
+# config-server application.yaml
+
+spring:
+  application:
+    name: config-server
+
+  cloud:
+    config:
+      server:
+        git:
+          # ── Point this at your own config git repo ──────────────────────────
+          # Local filesystem example (good for dev):
+          #   uri: file://${user.home}/config-repo
+          # Remote Git example:
+          uri: https://github.com/dima9997038/KortexVTreadsKotlin
+          # Branch to read from
+          default-label: master
+          # Clone on start so the first request is fast
+          clone-on-start: true
+          # How long (seconds) to cache properties before re-fetching from git
+          refresh-rate: 30
+
+server:
+  port: 8888
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+# Expose /actuator/health so gateway / load-balancer can probe liveness
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, env

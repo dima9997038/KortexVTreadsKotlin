@@ -20,7 +20,17 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client") // ← Added
+
+    // Service discovery (Eureka)
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+
+    // ── Runtime config refresh ───────────────────────────────────────────────
+    // Pulls properties from the Config Server on startup
+    implementation("org.springframework.cloud:spring-cloud-starter-config")
+    // Exposes /actuator/refresh (and /actuator/env, /actuator/health, etc.)
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    // ────────────────────────────────────────────────────────────────────────
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 

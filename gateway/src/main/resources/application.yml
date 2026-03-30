@@ -1,3 +1,5 @@
+
+#gateway application.yaml file
 server:
   port: 8080
 
