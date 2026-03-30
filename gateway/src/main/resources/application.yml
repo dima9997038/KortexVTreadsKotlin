@@ -1,18 +1,17 @@
-
-#gateway application.yaml file
-server:
-  port: 8080
-
+# gateway/application.yaml
 spring:
   application:
     name: gateway
+  config:
+    import: optional:configserver:http://localhost:8888
+
   cloud:
     gateway:
       server:
         webmvc:
           routes:
             - id: backend-route
-              uri: lb://backend
+              uri: lb://kortex
               predicates:
                 - Path=/api/**
               filters:
