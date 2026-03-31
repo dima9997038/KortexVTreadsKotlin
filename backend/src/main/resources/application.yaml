@@ -5,12 +5,43 @@ spring:
     virtual:
       enabled: true
 
+  # ── Config Client: import properties from the Config Server ─────────────────
+  # "optional:" means the app still starts even if the config server is down.
+  # Remove "optional:" in production to make the config server mandatory.
+  config:
+    import: "optional:configserver:http://config-server:8888"
+
+  cloud:
+    config:
+      # Retry connecting to the config server up to 6 times before giving up
+      fail-fast: false
+      retry:
+        initial-interval: 1000
+        max-attempts: 6
+        max-interval: 2000
+        multiplier: 1.1
+
 server:
   port: 0
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://eureka:8761/eureka
   instance:
     prefer-ip-address: true
+
+# ── Actuator: expose the /actuator/refresh endpoint ─────────────────────────
+# POST /actuator/refresh  → re-fetches config from Config Server and
+#                           hot-reloads all @RefreshScope beans.
+# POST /actuator/env      → inspect current resolved properties (read-only).
+management:
+  endpoints:
+    web:
+      exposure:
+        # Expose refresh + a few useful read endpoints.
+        # Replace * with this explicit list to reduce attack surface.
+        include: refresh, health, info, env
+  endpoint:
+    health:
+      show-details: always
