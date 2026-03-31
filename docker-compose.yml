@@ -59,6 +59,21 @@ services:
       - kortex-net
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: http://localhost:8090/api
+    container_name: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway
+    networks:
+      - kortex-net
+    restart: unless-stopped
+
 networks:
   kortex-net:
     driver: bridge
