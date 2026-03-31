@@ -1,0 +1,65 @@
+name: kortexvtreadskotlin
+
+services:
+  # ====================== Config Server ======================
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    depends_on:
+      eureka:
+        condition: service_started
+    networks:
+      - kortex-net
+    restart: unless-stopped
+
+  # ====================== Eureka Server ======================
+  eureka:
+    build:
+      context: ./eureka
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - kortex-net
+    restart: unless-stopped
+
+  # ====================== Gateway ======================
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: gateway
+    ports:
+      - "8090:8080"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka:
+        condition: service_started
+    networks:
+      - kortex-net
+    restart: unless-stopped
+
+  # ====================== Kortex Backend ======================
+  kortex:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kortex-service
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka:
+        condition: service_started
+    networks:
+      - kortex-net
+    restart: unless-stopped
+
+networks:
+  kortex-net:
+    driver: bridge
