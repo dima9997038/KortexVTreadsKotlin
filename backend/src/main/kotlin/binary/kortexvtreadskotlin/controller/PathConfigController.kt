@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/config")
-@CrossOrigin(origins = ["http://localhost:3000"])
+//@CrossOrigin(origins = ["http://localhost:3000"])
 class PathConfigController(
     private val allowedPathsProperties: AllowedPathsProperties
 ) {

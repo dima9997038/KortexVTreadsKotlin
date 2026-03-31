@@ -23,7 +23,7 @@ export const IntegrationList = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('http://localhost:8080/api/config/paths')
+        fetch('http://localhost:8090/api/config/paths')
             .then((res) => res.json())
             .then((data) => {
                 setRecords(flattenRoutes(data));

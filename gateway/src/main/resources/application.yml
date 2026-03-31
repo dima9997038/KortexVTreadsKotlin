@@ -14,8 +14,6 @@ spring:
               uri: lb://kortex
               predicates:
                 - Path=/api/**
-              filters:
-                - StripPrefix=1
 
 eureka:
   client:
