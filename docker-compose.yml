@@ -1,0 +1,52 @@
+services:
+  eureka:
+    build: ./eureka
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - kortex
+
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eureka
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=config-server
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - kortex
+
+  gateway:
+    build: ./gateway
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka:8761/eureka/
+    networks:
+      - kortex
+
+  backend:
+    build: ./backend
+    container_name: backend-service
+    depends_on:
+      - eureka
+      - config-server
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_INSTANCE_HOSTNAME=backend-service
+      - EUREKA_INSTANCE_INSTANCE_ID=backend-service:$${spring.application.name}:$${server.port}
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - kortex
+
+networks:
+  kortex:
