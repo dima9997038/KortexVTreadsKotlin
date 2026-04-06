@@ -1,0 +1,80 @@
+
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+discovery.docker "kortex_containers" {
+  host = "unix:///var/run/docker.sock"
+
+  filter {
+    name   = "label"
+    values = ["com.docker.compose.project=kortexvtreadskotlin"]
+  }
+}
+
+
+discovery.relabel "kortex_relabel" {
+  targets = discovery.docker.kortex_containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_project"]
+    target_label  = "project"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_log_stream"]
+    target_label  = "stream"
+  }
+}
+
+
+loki.source.docker "docker_logs" {
+  host             = "unix:///var/run/docker.sock"
+  targets          = discovery.relabel.kortex_relabel.output
+  forward_to       = [loki.write.loki_backend.receiver]
+  refresh_interval = "5s"
+}
+
+loki.write "loki_backend" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+
+prometheus.scrape "spring_services" {
+  targets = [
+
+    {"__address__" = "gateway:8080", "__metrics_path__" = "/kortex/actuator/prometheus", "service" = "kortex",        "layer" = "backend"},
+
+
+    {"__address__" = "gateway:8080", "__metrics_path__" = "/actuator/prometheus",         "service" = "gateway",       "layer" = "gateway"},
+
+
+    {"__address__" = "eureka-server:8761", "__metrics_path__" = "/actuator/prometheus",   "service" = "eureka",        "layer" = "infra"},
+    {"__address__" = "config-server:8888", "__metrics_path__" = "/actuator/prometheus",   "service" = "config-server", "layer" = "infra"},
+  ]
+
+  scrape_interval = "15s"
+  scrape_timeout  = "10s"
+
+  forward_to = [prometheus.remote_write.prometheus_backend.receiver]
+}
+
+prometheus.remote_write "prometheus_backend" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}

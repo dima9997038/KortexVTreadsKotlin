@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: 'Kortex Dashboards'
+    orgId: 1
+    folder: 'KortexVTreadsKotlin'
+    folderUid: 'kortex'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

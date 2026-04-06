@@ -3,17 +3,13 @@ spring:
     name: kortex
   threads:
     virtual:
-      enabled: true
+      enabled: true          # Java 21 virtual threads
 
-  # ── Config Client: import properties from the Config Server ─────────────────
-  # "optional:" means the app still starts even if the config server is down.
-  # Remove "optional:" in production to make the config server mandatory.
+  # ── Config Client ────────────────────────────────────────────────────────────
   config:
     import: "optional:configserver:http://config-server:8888"
-
   cloud:
     config:
-      # Retry connecting to the config server up to 6 times before giving up
       fail-fast: false
       retry:
         initial-interval: 1000
@@ -31,17 +27,22 @@ eureka:
   instance:
     prefer-ip-address: true
 
-# ── Actuator: expose the /actuator/refresh endpoint ─────────────────────────
-# POST /actuator/refresh  → re-fetches config from Config Server and
-#                           hot-reloads all @RefreshScope beans.
-# POST /actuator/env      → inspect current resolved properties (read-only).
+# ── Actuator + Prometheus ────────────────────────────────────────────────────
+# Prometheus scrapes this service via:
+#   gateway:8080/kortex/actuator/prometheus  →  lb://kortex/actuator/prometheus
 management:
   endpoints:
     web:
       exposure:
-        # Expose refresh + a few useful read endpoints.
-        # Replace * with this explicit list to reduce attack surface.
-        include: refresh, health, info, env
+        include: health, info, env, refresh, metrics, prometheus
   endpoint:
     health:
       show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      service: kortex
