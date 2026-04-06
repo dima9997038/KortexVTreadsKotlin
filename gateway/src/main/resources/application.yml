@@ -1,4 +1,3 @@
-# gateway/application.yaml
 spring:
   application:
     name: gateway
@@ -15,9 +14,34 @@ spring:
               predicates:
                 - Path=/api/**
 
+            - id: kortex-actuator
+              uri: lb://kortex
+              predicates:
+                - Path=/kortex/actuator/**
+              filters:
+                - StripPrefix=1
+
 eureka:
   client:
     service-url:
       defaultZone: http://eureka:8761/eureka/
   instance:
     prefer-ip-address: true
+
+# Actuator + Prometheus exposure
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus, refresh, env
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      service: gateway

@@ -1,0 +1,50 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    project: 'kortexvtreadskotlin'
+
+scrape_configs:
+
+
+  - job_name: 'kortex-backend'
+    metrics_path: '/kortex/actuator/prometheus'
+    static_configs:
+      - targets: ['gateway:8080']
+        labels:
+          service: 'kortex'
+          layer: 'backend'
+
+  - job_name: 'gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['gateway:8080']
+        labels:
+          service: 'gateway'
+          layer: 'gateway'
+
+
+  - job_name: 'eureka'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['eureka-server:8761']
+        labels:
+          service: 'eureka'
+          layer: 'infra'
+
+
+  - job_name: 'config-server'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['config-server:8888']
+        labels:
+          service: 'config-server'
+          layer: 'infra'
+
+
+  - job_name: 'alloy'
+    static_configs:
+      - targets: ['alloy:12345']
+        labels:
+          service: 'alloy'
+          layer: 'observability'

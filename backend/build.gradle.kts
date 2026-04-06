@@ -31,7 +31,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     // ────────────────────────────────────────────────────────────────────────
 
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
 }
 
 dependencyManagement {

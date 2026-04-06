@@ -1,5 +1,3 @@
-# config-server application.yaml
-
 spring:
   application:
     name: config-server
@@ -26,13 +24,24 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka:8761/eureka/     # ← Changed to service name
+      defaultZone: http://eureka:8761/eureka
   instance:
     prefer-ip-address: true
 
-# Expose /actuator/health so gateway / load-balancer can probe liveness
+# ── Actuator + Prometheus ────────────────────────────────────────────────────
 management:
   endpoints:
     web:
       exposure:
-        include: health, info, env
+        include: health, info, metrics, prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      service: config-server
