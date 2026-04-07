@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk AS builder
+FROM eclipse-temurin:25-jdk AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY src src
 
 RUN ./gradlew bootJar --no-daemon -x test
 
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:25-jre
 
 RUN groupadd -r spring && useradd -r -g spring spring
 
