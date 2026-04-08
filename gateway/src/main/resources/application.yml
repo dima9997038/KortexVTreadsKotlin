@@ -10,38 +10,25 @@ spring:
         webmvc:
           routes:
             - id: backend-route
-              uri: lb://kortex
+              uri: lb://KORTEX
               predicates:
                 - Path=/api/**
-
             - id: kortex-actuator
-              uri: lb://kortex
+              uri: lb://KORTEX
               predicates:
                 - Path=/kortex/actuator/**
               filters:
                 - StripPrefix=1
+              metadata:
+                connect-timeout: 60000
+                response-timeout: 60s
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka:8761/eureka/
-  instance:
-    prefer-ip-address: true
-
-# Actuator + Prometheus exposure
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info, metrics, prometheus, refresh, env
-  endpoint:
-    health:
-      show-details: always
-  prometheus:
-    metrics:
-      export:
-        enabled: true
-  metrics:
-    tags:
-      application: ${spring.application.name}
-      service: gateway
+server:
+  tomcat:
+    threads:
+      max: 10000
+      min-spare: 100
+    accept-count: 500
+    max-connections: 20000
+    connection-timeout: 60000        # таймаут входящих соединений (мс)
+    keep-alive-timeout: 60000

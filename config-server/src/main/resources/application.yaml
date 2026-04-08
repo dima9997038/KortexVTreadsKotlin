@@ -27,8 +27,8 @@ eureka:
       defaultZone: http://eureka:8761/eureka
   instance:
     prefer-ip-address: true
+    appname: ${spring.application.name}
 
-# ── Actuator + Prometheus ────────────────────────────────────────────────────
 management:
   endpoints:
     web:

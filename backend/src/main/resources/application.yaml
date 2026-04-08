@@ -5,7 +5,6 @@ spring:
     virtual:
       enabled: true          # Java 21 virtual threads
 
-  # ── Config Client ────────────────────────────────────────────────────────────
   config:
     import: "optional:configserver:http://config-server:8888"
   cloud:
@@ -19,6 +18,14 @@ spring:
 
 server:
   port: 0
+  tomcat:
+    threads:
+      max: 2000
+      min-spare: 100
+    connection-timeout: 60000      # основной таймаут соединения (мс)
+    keep-alive-timeout: 60000      # таймаут для keep-alive
+    max-connections: 20000
+    accept-count: 500
 
 eureka:
   client:
@@ -26,10 +33,8 @@ eureka:
       defaultZone: http://eureka:8761/eureka
   instance:
     prefer-ip-address: true
+    appname: ${spring.application.name}
 
-# ── Actuator + Prometheus ────────────────────────────────────────────────────
-# Prometheus scrapes this service via:
-#   gateway:8080/kortex/actuator/prometheus  →  lb://kortex/actuator/prometheus
 management:
   endpoints:
     web:
