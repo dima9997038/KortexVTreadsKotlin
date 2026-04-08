@@ -1,18 +1,17 @@
 spring:
   application:
     name: eureka
+  profiles:
+    default: local
 
 server:
-  port: 8761
+  port: ${SERVER_PORT:8761}
 
 eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
-    service-url:
-      defaultZone: http://eureka:8761/eureka
 
-#  Actuator + Prometheus
 management:
   endpoints:
     web:

@@ -7,8 +7,11 @@ services:
       context: ./eureka
       dockerfile: Dockerfile
     container_name: eureka-server
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SERVER_PORT: ${EUREKA_PORT}
     ports:
-      - "8761:8761"
+      - "${EUREKA_PORT}:${EUREKA_PORT}"
     networks:
       - kortex-net
     restart: unless-stopped
@@ -18,8 +21,15 @@ services:
       context: ./config-server
       dockerfile: Dockerfile
     container_name: config-server
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SERVER_PORT: ${CONFIG_SERVER_PORT}
+      EUREKA_URL: ${EUREKA_URL}
+      CONFIG_GIT_URI: ${CONFIG_GIT_URI}
+      CONFIG_GIT_BRANCH: ${CONFIG_GIT_BRANCH}
+      CONFIG_GIT_REFRESH_RATE: ${CONFIG_GIT_REFRESH_RATE}
     ports:
-      - "8888:8888"
+      - "${CONFIG_SERVER_PORT}:${CONFIG_SERVER_PORT}"
     depends_on:
       eureka:
         condition: service_started
@@ -32,8 +42,12 @@ services:
       context: ./gateway
       dockerfile: Dockerfile
     container_name: gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      EUREKA_URL: ${EUREKA_URL}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
     ports:
-      - "8090:8080"
+      - "${GATEWAY_PORT}:8080"
     depends_on:
       config-server:
         condition: service_healthy
@@ -48,6 +62,10 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: kortex-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      EUREKA_URL: ${EUREKA_URL}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
     depends_on:
       config-server:
         condition: service_healthy
@@ -62,7 +80,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        REACT_APP_API_URL: http://localhost:8090/api
+        REACT_APP_API_URL: ${REACT_APP_API_URL}
     container_name: frontend
     ports:
       - "3000:80"
@@ -71,7 +89,6 @@ services:
     networks:
       - kortex-net
     restart: unless-stopped
-
 
   prometheus:
     image: prom/prometheus:latest
@@ -125,10 +142,10 @@ services:
     image: grafana/grafana:11.6.0
     container_name: grafana
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_SERVER_ROOT_URL=http://localhost:3001
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=${GF_USERS_ALLOW_SIGN_UP}
+      - GF_SERVER_ROOT_URL=${GF_SERVER_ROOT_URL}
     volumes:
       - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana_data:/var/lib/grafana
