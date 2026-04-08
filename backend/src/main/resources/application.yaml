@@ -1,13 +1,11 @@
 spring:
   application:
     name: kortex
+  profiles:
+    default: local
   threads:
     virtual:
-      enabled: true          # Java 21 virtual threads
-
-  # ── Config Client ────────────────────────────────────────────────────────────
-  config:
-    import: "optional:configserver:http://config-server:8888"
+      enabled: true
   cloud:
     config:
       fail-fast: false
@@ -18,18 +16,8 @@ spring:
         multiplier: 1.1
 
 server:
-  port: 0
+  port: ${SERVER_PORT:0}
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka:8761/eureka
-  instance:
-    prefer-ip-address: true
-
-# ── Actuator + Prometheus ────────────────────────────────────────────────────
-# Prometheus scrapes this service via:
-#   gateway:8080/kortex/actuator/prometheus  →  lb://kortex/actuator/prometheus
 management:
   endpoints:
     web:

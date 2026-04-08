@@ -1,34 +1,19 @@
 spring:
   application:
     name: config-server
-
+  profiles:
+    default: local
   cloud:
     config:
       server:
         git:
-          # ── Point this at your own config git repo ──────────────────────────
-          # Local filesystem example (good for dev):
-          #   uri: file://${user.home}/config-repo
-          # Remote Git example:
-          uri: https://github.com/dima9997038/KortexVTreadsKotlin
-          # Branch to read from
-          default-label: master
-          # Clone on start so the first request is fast
+          default-label: ${CONFIG_GIT_BRANCH:master}
           clone-on-start: true
-          # How long (seconds) to cache properties before re-fetching from git
-          refresh-rate: 30
+          refresh-rate: ${CONFIG_GIT_REFRESH_RATE:30}
 
 server:
-  port: 8888
+  port: ${SERVER_PORT:8888}
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka:8761/eureka
-  instance:
-    prefer-ip-address: true
-
-# ── Actuator + Prometheus ────────────────────────────────────────────────────
 management:
   endpoints:
     web:
